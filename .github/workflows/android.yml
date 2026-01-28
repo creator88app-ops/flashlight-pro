@@ -25,6 +25,10 @@ jobs:
           cp pubspec.yaml app/pubspec.yaml
           cp -r lib app/lib
 
+      - name: Fix minSdkVersion
+        run: |
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 23/g' app/android/app/build.gradle
+
       - name: Install dependencies
         run: cd app && flutter pub get
 
