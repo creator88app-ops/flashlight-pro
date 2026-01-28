@@ -24,7 +24,6 @@ jobs:
         run: |
           cp pubspec.yaml app/pubspec.yaml
           cp -r lib app/lib
-          cp android/app/src/main/AndroidManifest.xml app/android/app/src/main/AndroidManifest.xml
 
       - name: Install dependencies
         run: cd app && flutter pub get
