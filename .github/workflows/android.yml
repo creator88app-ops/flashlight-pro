@@ -17,14 +17,23 @@ jobs:
         with:
           flutter-version: '3.19.6'
 
+      - name: Create Flutter project
+        run: flutter create app
+
+      - name: Copy project files
+        run: |
+          cp pubspec.yaml app/pubspec.yaml
+          cp -r lib app/lib
+          cp android/app/src/main/AndroidManifest.xml app/android/app/src/main/AndroidManifest.xml
+
       - name: Install dependencies
-        run: flutter pub get
+        run: cd app && flutter pub get
 
       - name: Build APK
-        run: flutter build apk --release
+        run: cd app && flutter build apk --release
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: flashlight-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: app/build/app/outputs/flutter-apk/app-release.apk
