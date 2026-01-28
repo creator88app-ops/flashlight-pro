@@ -2,131 +2,116 @@ import 'package:flutter/material.dart';
 import 'package:torch_light/torch_light.dart';
 
 void main() {
-  runApp(const FlashLightProApp());
+  runApp(const FlashLightPro());
 }
 
-class FlashLightProApp extends StatelessWidget {
-  const FlashLightProApp({super.key});
+class FlashLightPro extends StatelessWidget {
+  const FlashLightPro({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'FlashLight Pro',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0D0F14),
-      ),
-      home: const FlashLightHome(),
+      theme: ThemeData.dark(),
+      home: const FlashHomePage(),
     );
   }
 }
 
-class FlashLightHome extends StatefulWidget {
-  const FlashLightHome({super.key});
+class FlashHomePage extends StatefulWidget {
+  const FlashHomePage({super.key});
 
   @override
-  State<FlashLightHome> createState() => _FlashLightHomeState();
+  State<FlashHomePage> createState() => _FlashHomePageState();
 }
 
-class _FlashLightHomeState extends State<FlashLightHome> {
-  bool _isOn = false;
-  double _intensity = 1.0;
-  bool _intensitySupported = true;
+class _FlashHomePageState extends State<FlashHomePage> {
+  bool isOn = false;
+  double intensity = 1.0;
 
-  Future<void> _toggleFlash() async {
+  Future<void> toggleFlash() async {
     try {
-      if (_isOn) {
+      if (isOn) {
         await TorchLight.disableTorch();
       } else {
         await TorchLight.enableTorch();
       }
-      setState(() => _isOn = !_isOn);
-    } on Exception {
-      setState(() => _intensitySupported = false);
+      setState(() {
+        isOn = !isOn;
+      });
+    } catch (e) {
+      debugPrint(e.toString());
     }
-  }
-
-  Future<void> _setIntensity(double value) async {
-    setState(() => _intensity = value);
-    try {
-      await TorchLight.enableTorch();
-    } catch (_) {
-      setState(() => _intensitySupported = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    TorchLight.disableTorch();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: isOn ? Colors.white : Colors.black,
       body: SafeArea(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const SizedBox(height: 40),
-            Expanded(
-              child: Center(
-                child: GestureDetector(
-                  onTap: _toggleFlash,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _isOn
-                          ? Colors.yellow.withOpacity(0.9)
-                          : Colors.grey.shade800,
-                      boxShadow: [
-                        if (_isOn)
-                          BoxShadow(
-                            color: Colors.yellow.withOpacity(0.7),
-                            blurRadius: 60,
-                            spreadRadius: 20,
-                          ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.power_settings_new,
-                      size: 100,
-                      color: _isOn ? Colors.black : Colors.white,
-                    ),
-                  ),
+
+            // Üst başlık
+            Text(
+              "FlashLight Pro",
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: isOn ? Colors.black : Colors.white,
+              ),
+            ),
+
+            // Büyük güç butonu
+            GestureDetector(
+              onTap: toggleFlash,
+              child: Container(
+                width: 200,
+                height: 200,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isOn ? Colors.yellow : Colors.grey[900],
+                  boxShadow: [
+                    BoxShadow(
+                      color: isOn ? Colors.yellowAccent : Colors.black,
+                      blurRadius: 40,
+                      spreadRadius: 10,
+                    )
+                  ],
+                ),
+                child: Icon(
+                  Icons.power_settings_new,
+                  size: 100,
+                  color: isOn ? Colors.black : Colors.white,
                 ),
               ),
             ),
-            if (_intensitySupported)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    const Text(
-                      "Intensity",
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                    Slider(
-                      value: _intensity,
-                      min: 0.1,
-                      max: 1.0,
-                      onChanged: _isOn ? _setIntensity : null,
-                    ),
-                  ],
+
+            // Işık şiddeti slider (görsel amaçlı)
+            Column(
+              children: [
+                Text(
+                  "Light Intensity",
+                  style: TextStyle(
+                    color: isOn ? Colors.black : Colors.white,
+                    fontSize: 18,
+                  ),
                 ),
-              ),
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30),
-              child: IconButton(
-                iconSize: 40,
-                color: Colors.white70,
-                icon: const Icon(Icons.flashlight_on),
-                onPressed: _toggleFlash,
-              ),
-            )
+                Slider(
+                  value: intensity,
+                  onChanged: (value) {
+                    setState(() {
+                      intensity = value;
+                    });
+                  },
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 40),
           ],
         ),
       ),
